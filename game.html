@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Arbeidskrav 1!</title>
+    <link rel="stylesheet" href="game.css" />
+  </head>
+  <body>
+    <div class="main-container">
+      <!-- Healthbars til heroene -->
+      <div class="hero-health-containers">
+        <div
+          class="healthbar-container"
+          data-hero-index="0"
+          onclick="hero1(this,0)"
+        >
+          <div class="healthbar healer-health"></div>
+          <div class="text-container">
+            <p id="name-txt-0">Healerens navn</p>
+            <p id="health-txt-0">400 / 400 HP</p>
+          </div>
+        </div>
+        <div
+          class="healthbar-container"
+          data-hero-index="1"
+          onclick="hero1(this,1)"
+        >
+          <div class="healthbar archer-health"></div>
+          <div class="text-container">
+            <p id="name-txt-1">Archerens navn</p>
+            <p id="health-txt-1">600 / 600 HP</p>
+          </div>
+        </div>
+        <div
+          class="healthbar-container"
+          data-hero-index="2"
+          onclick="hero1(this,2)"
+        >
+          <div class="healthbar warrior-health"></div>
+          <div class="text-container">
+            <p id="name-txt-2">Warriorens navn</p>
+            <p id="health-txt-2">800 / 800 HP</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Healthbar til fienden -->
+      <div class="dragon-health-container">
+        <div class="healthbar-container">
+          <div class="healthbar dragon-health"></div>
+          <div class="text-container">
+            <p id="dragon-name-txt">Dragens navn</p>
+            <div
+              class="text-container dragon-health-txt"
+              id="dragon-health-display"
+            >
+              2000 / 2000 HP
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bildecontainere for heroene -->
+      <div class="img-container healer">
+        <img class="hero" src="assets/healer.png" />
+      </div>
+      <div class="img-container archer">
+        <img class="hero" src="assets/archer.png" />
+      </div>
+      <div class="img-container warrior">
+        <img class="hero" src="assets/warrior.png" />
+      </div>
+
+      <!-- Bildecontainer for fienden -->
+      <div class="enemy-container">
+        <div class="img-container dragon-container">
+          <img class="dragon" src="assets/dragon.png" />
+        </div>
+      </div>
+    </div>
+    <script>
+      let heroesArray = [
+        {
+          id: 0,
+          name: "Henriette Healer",
+          maxHP: 400,
+          currentHP: 400,
+          damage: 100,
+          alive: true,
+        },
+        {
+          id: 1,
+          name: "Ariana archer",
+          maxHP: 500,
+          currentHP: 500,
+          damage: 400,
+          alive: true,
+        },
+        {
+          id: 2,
+          name: "Wyona Warrior",
+          maxHP: 600,
+          currentHP: 600,
+          damage: 400,
+          alive: true,
+        },
+      ];
+
+      let dragonObject = {
+        name: "Daar Dragon",
+        maxHP: 2000,
+        currentHP: 2000,
+        damage: 200,
+        alive: true,
+      };
+      function initializeHeroStatsDisplay() {
+        heroesArray.forEach((hero, index) => {
+          const nameElement = document.getElementById(`name-txt-${index}`);
+          const healthElement = document.getElementById(`health-txt-${index}`);
+
+          nameElement.textContent = hero.name;
+          healthElement.textContent = `${hero.currentHP} / ${hero.maxHP} HP`;
+        });
+
+        const dragonNameElement = document.getElementById("dragon-name-txt");
+        const dragonHealthElement = document.getElementById(
+          "dragon-health-display"
+        );
+
+        dragonNameElement.textContent = dragonObject.name;
+        dragonHealthElement.textContent = `${dragonObject.currentHP} / ${dragonObject.maxHP} HP`;
+      }
+
+      function hero1(element, heroIndex) {
+        const nameElement = element.querySelector(
+          `.text-container #name-txt-${heroIndex}`
+        );
+        const healthElement = element.querySelector(
+          `.text-container #health-txt-${heroIndex}`
+        );
+
+        const healthNumber = parseInt(
+          healthElement.textContent.split(" / ")[0]
+        );
+
+        const healthDisplay = document.getElementById("dragon-health-display");
+        let currentHealth = parseInt(healthDisplay.textContent.split(" / ")[0]);
+
+        const healerName = nameElement.textContent;
+        const healerHealth = healthElement.textContent;
+
+        alert(
+          healerName +
+            " har gjort " +
+            healerHealth +
+            " skade på Aurelius Drakon"
+        );
+
+        heroesArray[heroIndex].currentHP = Math.max(
+          0,
+          heroesArray[heroIndex].currentHP - dragonObject.damage
+        );
+
+        currentHealth = Math.max(0, currentHealth - parseInt(healthNumber));
+        healthDisplay.textContent = `${currentHealth} / 2000 HP`;
+
+        if (dragonObject.alive && currentHealth > 0) {
+          // Check if the dragon counterattacks (1/3 probability)
+          if (Math.random() < 1 / 3) {
+            // Select a random alive hero
+            const aliveHeroes = heroesArray.filter((hero) => hero.alive);
+            if (aliveHeroes.length > 0) {
+              const randomHeroIndex = Math.floor(
+                Math.random() * aliveHeroes.length
+              );
+              const randomHero = aliveHeroes[randomHeroIndex];
+
+              // Display dragon's counterattack alert
+              alert(
+                dragonObject.name + " har angrepet " + randomHero.name + "!"
+              );
+
+              // Deduct dragon's damage from the hero's health
+              randomHero.currentHP = Math.max(
+                0,
+                randomHero.currentHP - dragonObject.damage
+              );
+
+              // Update the displayed health of the attacked hero
+              const attackedHeroHealthElement = document.getElementById(
+                `health-txt-${randomHero.id}`
+              );
+              attackedHeroHealthElement.textContent = `${randomHero.currentHP} / ${randomHero.maxHP} HP`;
+
+              // Check if the attacked hero is dead
+              if (randomHero.currentHP <= 0) {
+                randomHero.alive = false;
+                removeHero(randomHero.id);
+              }
+            }
+          }
+        }
+        if (areAllHeroesDead() && dragonObject.alive && currentHealth > 0) {
+          alert("Spillet er tapt! " + dragonObject.name + " har vunnet!");
+          removeAllHeroes();
+        }
+
+        if (currentHealth <= 0) {
+          alert("Gratulerer, du har vunnet spillet!");
+          removeDragon();
+        }
+      }
+      function removeDragon() {
+        const dragonContainer = document.querySelector(
+          ".dragon-health-container"
+        );
+        if (dragonContainer) {
+          dragonContainer.remove();
+        }
+      }
+
+      function removeHero(heroIndex) {
+        const heroContainer = document.querySelector(
+          `.healthbar-container[data-hero-index="${heroIndex}"]`
+        );
+        if (heroContainer) {
+          heroContainer.remove();
+        }
+      }
+      function removeAllHeroes() {
+        const heroContainers = document.querySelectorAll(
+          ".healthbar-container"
+        );
+        heroContainers.forEach((container) => container.remove());
+      }
+      function areAllHeroesDead() {
+        return heroesArray.every((hero) => !hero.alive);
+      }
+
+      initializeHeroStatsDisplay();
+    </script>
+  </body>
+</html>
